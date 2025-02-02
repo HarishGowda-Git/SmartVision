@@ -1,3 +1,10 @@
-from django.http import HttpResponse
+from django.shortcuts import render
+from .models import Location
+
 def home(request):
-    return HttpResponse("This page is the Home page!")
+    return render(request,  'index.html')
+
+def map_view(request):
+    # Fetch all locations from the database
+    locations = Location.objects.all()
+    return render(request, 'map.html', {'locations': locations})
