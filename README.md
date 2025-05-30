@@ -1,157 +1,176 @@
-Aid for Visually Impaired Persons
+# Enhanced Multi-Model YOLO Object Detection System with React Native WebSocket Support
 
-Project Overview
+## Overview
 
-   This project aims to empower visually impaired individuals by leveraging cutting-edge technologies like YOLO (You Only Look Once), Machine Learning, and IoT devices. The system provides a   compact, efficient, and reliable solution to assist users in their daily activities through the following features:
-        Audio Response for Currency Detection: Identifies currency denominations and provides audio feedback to assist in monetary  transactions.
-  
-        Weather Analysis: Analyzes the weather conditions and alerts the user to unfavorable weather scenarios.
+This project implements a real-time, multi-model object detection system using YOLO (You Only Look Once) models with advanced features tailored for mobile apps using React Native. The system streams annotated video frames over WebSocket, performs weather condition analysis from video input, tracks live location, and uses text-to-speech for alerts.
 
-        Live Video Streaming: Facilitates live video transmission to a family member or friend for real-time support.
+**Version**: 3.1
+**Author**: Team 31
 
-        Object Detection: Detects objects in the user's vicinity and communicates their presence via audio alerts.
+## Key Features
 
-Key Features
+### ✅ Multi-Model YOLO Detection
 
-    1. Audio Response for Currency Detection
+* Supports loading and switching between multiple YOLOv8 models (e.g., object.pt, currency.pt).
 
-        Detects currency denominations using YOLO-based object detection models.
+### 🚀 WebSocket Streaming (React Native Compatible)
 
-        Supports multiple currencies with an option for expansion.
+* Streams real-time detections, frames, weather data, and location info using WebSocket.
 
-        Converts the detected denomination into speech using a text-to-speech module.
+### 🌧 Weather Analysis from Video Feed
 
-    2. Weather Analysis
+* Classifies real-world weather conditions (clear, rainy, foggy, etc.) using computer vision.
 
-        Integrates with weather APIs or on-device sensors to assess environmental conditions.
+### 📍 Live Location Tracking
 
-        Provides real-time alerts for rain, fog, or other adverse weather.
+* Tracks and updates GPS or IP-based location, used in alert context and overlay.
 
-        Displays weather insights on a companion mobile or web app.
+### 💡 Intelligent TTS Alert System
 
-    3. Live Video Streaming
+* Announces new detections or crowd warnings via a thread-safe text-to-speech module.
 
-        Streams live video from the device's camera to a pre-configured recipient via a secure web app.
+### ⏱ Real-Time Performance Metrics
 
-        Supports low-latency streaming and resolution adjustments for optimal bandwidth usage.
+* Displays FPS, object counts, weather info, and WebSocket client stats directly on the video window.
 
-        Includes the capability to add real-time annotations by the recipient for additional support.
+### 🚨 Alert Throttling & Management
 
-    4. Object Detection
+* Prevents repeated announcements with customizable cooldown periods.
 
-        Uses YOLO models to detect everyday objects and provide audio alerts to the user.
+### ⚖ Robust Error Handling & Logging
 
-        Can prioritize detection based on user preferences (e.g., identifying nearby obstacles first).
+* All components wrapped with try/except and detailed logs to handle runtime issues.
 
-        Offers expandable detection categories based on training data.
+---
 
-System Components
+## System Requirements
 
-Hardware
+### Python Version
 
-    Core Processing Unit: Raspberry Pi 4 with Coral Mini PCIe Accelerator.
+* Python 3.8+
 
-    Camera Module: Sony IMX219 (4K) camera.
+### Required Python Packages
 
-    SIM and GPS Modules:
+Install all dependencies using pip:
 
-        SIM7600 Series for internet and GPS tracking.
+```bash
+pip install opencv-python ultralytics pyttsx3 numpy requests websockets asyncio
+pip install fastapi uvicorn python-multipart aiofiles pillow geopy
+pip install opencv-contrib-python scikit-learn tensorflow
+```
 
-        Quectel EC25 Series for enhanced connectivity.
+---
 
-    Audio Output: Lightweight, wearable earphones or speakers.
+## Configuration
 
-    Power Supply: Portable battery pack for extended usage.
+Modify `create_default_config()` to customize system behavior:
 
-Software
+* **Models**: Add/Remove YOLO `.pt` files.
+* **Thresholds**: Detection confidence and crowd alert.
+* **Streaming**: WebSocket host, port, JPEG quality.
+* **Intervals**: Location/weather update intervals.
 
-    Object Detection: YOLOv5/YOLOv8 models for real-time detection.
+Example snippet:
 
-    Currency Detection: Custom-trained YOLO models for identifying currency notes.
+```python
+Config(
+    model_paths=["object.pt", "Currency.pt"],
+    conf_threshold=0.5,
+    person_threshold=2,
+    websocket_host="0.0.0.0",
+    websocket_port=8765,
+    streaming_quality=80,
+    location_update_interval=30.0,
+    weather_analysis_interval=5.0
+)
+```
 
-    Weather Analysis: Python-based integration with OpenWeather API or sensors.
+---
 
-    Live Video Streaming: Django-based web app for remote video monitoring.
+## Usage Instructions
 
-    Speech Processing: Google Text-to-Speech (TTS) or an offline alternative like pyttsx3.
+### 1. Run the Script
 
-Installation Guide
+```bash
+python your_script_name.py
+```
 
-Prerequisites
+### 2. Controls During Execution
 
-    Raspberry Pi 4 with Raspbian OS.
+* Press `q` to quit
+* Press `s` to take a screenshot
+* Press `p` to pause/unpause detection
 
-    Python 3.9 or later.
+### 3. React Native Client Setup
 
-    Internet connectivity.
+Connect your React Native app using:
 
-Steps
+```js
+const socket = new WebSocket("ws://<your_server_ip>:8765");
+```
 
-    Clone this repository:
+* Ensure device and server are on the same network.
 
-        git clone https://github.com/your-username/aid-for-visually-impaired.git
+---
 
-    Install required Python dependencies:
+## Output Data Structure
 
-        pip install -r requirements.txt
+**WebSocket Message Format**:
 
-    Configure the web app for live video streaming:
+```json
+{
+  "type": "frame",
+  "image": "data:image/jpeg;base64,...",
+  "detections": [
+    {
+      "class_name": "person",
+      "confidence": 0.98,
+      "bbox": { "x1": 12, "y1": 34, "x2": 128, "y2": 256 },
+      "model": "object",
+      "color": {"r": 0, "g": 255, "b": 0}
+    }
+  ],
+  "weather": {
+    "condition": "clear",
+    "confidence": 0.93,
+    "brightness": 179.4,
+    "contrast": 12.1
+  },
+  "location": {
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "address": "Bangalore, Karnataka, India",
+    "method": "ip"
+  }
+}
+```
 
-    Navigate to the web_app directory.
+---
 
-        Modify settings.py with your server details.
+## Future Improvements
 
-    Run the server:
+* Add GPS-based fallback for mobile clients.
+* Integrate cloud-based logging.
+* Add YOLOv9 support when available.
 
-    python manage.py runserver
+---
 
-    Train YOLO models (optional):
+## Troubleshooting
 
-    Prepare your dataset.
+| Issue                        | Possible Fix                                   |
+| ---------------------------- | ---------------------------------------------- |
+| WebSocket not connecting     | Verify port 8765 is open, check firewall rules |
+| No detection                 | Check model paths and confidence threshold     |
+| Weather/Location not showing | Ensure internet access and proper permissions  |
 
-    Use the provided training script.
+---
 
-    Deploy the system on the IoT device:
+## License
 
-    Flash the application to the Raspberry Pi.
+MIT License. Free for personal and commercial use.
 
-    Connect the SIM module and camera.
+---
 
-Usage Instructions
+## Contact
 
-    Power on the device and ensure all modules are connected.
-
-    Follow voice instructions for initial setup.
-
-    Use physical buttons or voice commands to activate features like:
-
-    Currency detection.
-
-    Weather update.
-
-    Live video streaming.
-
-    Object detection.
-
-Future Enhancements
-
-    Multi-language support for audio responses.
-
-    Integration of AI-powered navigation assistance.
-
-    Offline mode for weather analysis.
-
-    Extended battery life.
-
-Contributors
-
-    - Harish Gowda B
-    - Nitish Nagappa Gouda
-    - Prajwal Gowda R
-    - Venugopal Hegde
-
-License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-We aim to make the world more accessible for visually impaired individuals through this innovative project. Feel free to contribute or suggest improvements!
+For technical queries, contact the author or raise a GitHub issue (if applicable).
